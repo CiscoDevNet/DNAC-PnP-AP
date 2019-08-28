@@ -4,6 +4,10 @@ DNAC has a set of sites the WLC is responsible for, and the AP is able to be cla
 
 This script allows a generic WLC config to be pushed to the AP.
 
+### Step 0: change the credential
+You need to edit the dnac_config.py file to change the DNAC and user name and password.
+If you know how to use environment variables, you can do that instead.
+
 ### Step 1: Upload configuration file.
 Use the 00_flle_sync.py script to upload the json file for the AP.
 
