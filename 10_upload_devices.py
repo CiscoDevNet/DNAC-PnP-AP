@@ -97,6 +97,7 @@ def create_workflow(dnac, workflowName, configid):
     #print(json.dumps(payload, indent=2))
     response = dnac.pnp.add_a_workflow(payload=payload)
     #print(json.dumps(response))
+    return response.id
 
 def get_or_create_workflow(dnac, configfile):
     # look for workflow with the config file or create it
@@ -108,7 +109,7 @@ def get_or_create_workflow(dnac, configfile):
             fileid = file.id
 
     #print(fileid)
-    workflowName = "configfile-AP"
+    workflowName = "configfile-{}-AP".format(configfile)
     try:
         workflowid, wkfileid = get_workflow(dnac, workflowName)
 
