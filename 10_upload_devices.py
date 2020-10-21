@@ -17,7 +17,7 @@ from dnacentersdk import api
 def add_device(dnac, name, serial, pid):
     payload = [{
 	"deviceInfo": {
-		"name": name,
+		"hostname": name,
 		"serialNumber": serial,
 		"pid": pid,
 		"sudiRequired": False,
