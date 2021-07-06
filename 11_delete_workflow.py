@@ -23,5 +23,5 @@ def main(dnac,filename):
 
 if __name__ == "__main__":
     dnac = api.DNACenterAPI(base_url='https://{}:443'.format(DNAC),
-                                username=DNAC_USER,password=DNAC_PASSWORD,verify=False)
+                                username=DNAC_USER,password=DNAC_PASSWORD,verify=False,version="1.3.0")
     main(dnac,sys.argv[1])

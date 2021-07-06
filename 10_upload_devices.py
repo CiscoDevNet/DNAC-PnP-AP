@@ -166,7 +166,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     dnac = api.DNACenterAPI(base_url='https://{}:443'.format(DNAC),
-                                username=DNAC_USER,password=DNAC_PASSWORD,verify=False)
+                                username=DNAC_USER,password=DNAC_PASSWORD,verify=False,version="1.3.0")
     print ("Using device file:", args.devices)
 
     print ("##########################")
