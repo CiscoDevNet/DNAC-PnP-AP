@@ -1,0 +1,7 @@
+{
+  "primaryWlcIP": "192.168.200.201",
+  "primaryWlcName": "WLC9800",
+  "policyTagName": "PT_AUS_PER5_F4_fb5ec",
+  "RFTagName": "HIGH",
+  "siteTagName": "default-site-tag"
+}
