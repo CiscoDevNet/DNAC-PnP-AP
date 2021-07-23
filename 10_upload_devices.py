@@ -12,7 +12,8 @@ from dnac_config import DNAC, DNAC_USER, DNAC_PASSWORD
 from argparse import ArgumentParser
 from dnacentersdk import api
 
-
+# create a logger
+logger = logging.getLogger(__name__)
 
 def add_device(dnac, name, serial, pid):
     payload = [{
@@ -65,13 +66,14 @@ def claim_device(dnac,deviceId, workflowId):
 
 def get_workflow(dnac,workflowName):
     #response = get (dnac, "onboarding/pnp-workflow")
-    #print(workflowName)
+    logger.debug("Geting workflow {}".format(workflowName))
 
     workflow = dnac.pnp.get_workflows(name=workflowName)
     if workflow == []:
         raise ValueError("Cannot find template:{}".format(workflowName))
-    #print(json.dumps(workflow,indent=2))
+    logger.debug(json.dumps(workflow,indent=2))
     fileid=workflow[0].tasks[0].configInfo.fileServiceId
+    logger.debug("found {}/{}".format(workflow[0].id, fileid))
     return workflow[0].id, fileid
 
 def create_workflow(dnac, workflowName, configid):
@@ -107,8 +109,11 @@ def get_or_create_workflow(dnac, configfile):
     for file in files.response:
         if file.name == configfile:
             fileid = file.id
+    if fileid is None:
+        print("Cannot file file {}".format(configfile))
 
-    #print(fileid)
+    logger.debug("Found configfile {} - {}".format(configfile, fileid))
+
     workflowName = "configfile-{}-AP".format(configfile)
     try:
         workflowid, wkfileid = get_workflow(dnac, workflowName)
@@ -163,7 +168,17 @@ if __name__ == "__main__":
     parser = ArgumentParser(description='Select options.')
     parser.add_argument( 'devices', type=str,
             help='device inventory csv file')
+    parser.add_argument('-v', action='store_true',
+                        help="verbose")
     args = parser.parse_args()
+
+    if args.v:
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        logger.debug("logging enabled")
     #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     dnac = api.DNACenterAPI(base_url='https://{}:443'.format(DNAC),
                                 username=DNAC_USER,password=DNAC_PASSWORD,verify=False,version="1.3.0")
