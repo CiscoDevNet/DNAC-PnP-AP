@@ -5,9 +5,13 @@ import hashlib
 # file is sync
 import requests
 import os.path
-
+from argparse import ArgumentParser
 from utils import login, get, create_url
 import os
+import logging
+# create a logger
+logger = logging.getLogger(__name__)
+
 DIR="work_files"
 
 class File(object):
@@ -48,7 +52,7 @@ class File(object):
             response = requests.post(url, files=files, headers=headers, verify=False)
         except requests.exceptions.RequestException  as cerror:
             print("Error processing request", cerror)
-
+        logger.debug("upload:{}".format(response.json()))
         return(response.json())
 
     def delete(self):
@@ -60,6 +64,7 @@ class File(object):
         fileid_list = [(file['id'], file['sha1Checksum']) for file in files.json()['response'] if file['name'] == self.name]
         self.fileid =  None if fileid_list == [] else fileid_list[0][0]
         self.sha1 = None if fileid_list == [] else fileid_list[0][1]
+        logger.debug("Looking for file {}, id found is {}".format(self.name, self.fileid))
         return self.fileid
 
 
@@ -110,6 +115,18 @@ def process_namespace(dnac, namespace):
                 print ("Skipping File:{file} ({id}) SHA1hash:{sha1}".format(file=filename, id=f.fileid, sha1=sha1))
 
 def main():
+    parser = ArgumentParser(description='Select options.')
+    parser.add_argument('-v', action='store_true',
+                        help="verbose")
+    args = parser.parse_args()
+
+    if args.v:
+        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        ch = logging.StreamHandler()
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+        logger.debug("logging enabled")
     dnac = login()
     process_namespace(dnac,"config")
     print()
