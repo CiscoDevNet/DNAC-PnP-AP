@@ -11,7 +11,7 @@ import logging
 from dnac_config import DNAC, DNAC_USER, DNAC_PASSWORD
 from argparse import ArgumentParser
 from dnacentersdk import api
-
+from file_cache import FileCache
 # create a logger
 logger = logging.getLogger(__name__)
 
@@ -101,17 +101,14 @@ def create_workflow(dnac, workflowName, configid):
     #print(json.dumps(response))
     return response.id
 
-def get_or_create_workflow(dnac, configfile):
+def get_or_create_workflow(dnac, file_cache, configfile):
     # look for workflow with the config file or create it
-    fileid=None
-    files = dnac.file.get_list_of_files(name_space="config")
+    file = file_cache.lookup(configfile)
 
-    for file in files.response:
-        if file.name == configfile:
-            fileid = file.id
-    if fileid is None:
-        print("Cannot file file {}".format(configfile))
+    if file is None:
+        raise(ValueError("Cannot file file {}".format(configfile)))
 
+    fileid = file.id
     logger.debug("Found configfile {} - {}".format(configfile, fileid))
 
     workflowName = "configfile-{}-AP".format(configfile)
@@ -133,7 +130,7 @@ def get_or_create_workflow(dnac, configfile):
 #    #print params
 #    return params
 
-def create_and_upload(dnac, devices):
+def create_and_upload(dnac, file_cache, devices):
 
     f = open(devices, 'rt')
     try:
@@ -142,7 +139,7 @@ def create_and_upload(dnac, devices):
             #print ("Variables:",device_row)
 
             try:
-                workflowId = get_or_create_workflow(dnac, device_row['configfile'])
+                workflowId = get_or_create_workflow(dnac, file_cache, device_row['configfile'])
             except ValueError as e:
                 print("##ERROR {},{}: {}".format(device_row['name'],device_row['serial'], e))
                 continue
@@ -185,4 +182,5 @@ if __name__ == "__main__":
     print ("Using device file:", args.devices)
 
     print ("##########################")
-    create_and_upload(dnac, devices=args.devices)
+    file_cache = FileCache(dnac,logger)
+    create_and_upload(dnac, file_cache, devices=args.devices)
